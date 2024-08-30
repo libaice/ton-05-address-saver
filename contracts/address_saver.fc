@@ -50,3 +50,7 @@ slice parse_sender_address(cell in_msg_full) inline {
         throw(3);
     }
 }
+
+(slice, slice) get_manager_and_memorized_address() method_id {
+    return load_data();
+}

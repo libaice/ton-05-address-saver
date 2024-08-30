@@ -52,4 +52,7 @@ export class AddressSaver implements Contract {
         });
     }
 
+    async getCurrentManagerAndMemorizedAddress(provider: ContractProvider) {
+        return (await provider.get('get_manager_and_memorized_address', [])).stack
+    }
 }

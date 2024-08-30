@@ -4,6 +4,7 @@ import {AddressSaver} from '../wrappers/AddressSaver';
 import '@ton/test-utils';
 import {compile} from '@ton/blueprint';
 import {randomAddress} from "@ton/test-utils";
+import assert from "node:assert";
 
 describe('AddressSaver', () => {
     let code: Cell;
@@ -34,11 +35,22 @@ describe('AddressSaver', () => {
     });
 
     it('should deploy successfully', async () => {
+        const addressList = await addressSaver.getCurrentManagerAndMemorizedAddress();
+
+        console.log('addressList', addressList.readAddress());
+        console.log('deployer.address', deployer.address)
     });
 
     it('should change saved address by manager', async () => {
+        // this address for updated address
         const address = randomAddress();
         const result = await addressSaver.sendChangeAddress(deployer.getSender(), toNano('0.01'), 12345n, address);
+
+        const addressList = await addressSaver.getCurrentManagerAndMemorizedAddress();
+        console.log('addressList 0 ', addressList.readAddress());
+        console.log('addressList 1 ', addressList.readAddress());
+        console.log('random address ', address);
+
         expect(result.transactions).toHaveTransaction({
             from: deployer.address,
             to: addressSaver.address,
@@ -46,10 +58,14 @@ describe('AddressSaver', () => {
         });
     });
 
+
     it("should not change saved address by anyone else", async () => {
         let user = await blockchain.treasury('user');
         let address = randomAddress();
         const result = await addressSaver.sendChangeAddress(user.getSender(), toNano('0.01'), 12345n, address);
+
+        const addressList = await addressSaver.getCurrentManagerAndMemorizedAddress();
+        console.log('addressList 0 ', addressList.readAddress());
 
         expect(result.transactions).toHaveTransaction({
             from: user.address,
@@ -61,7 +77,6 @@ describe('AddressSaver', () => {
     it('should return required data on `requestAddress` call', async () => {
         const address = randomAddress();
         await addressSaver.sendChangeAddress(deployer.getSender(), toNano('0.01'), 12345n, address);
-
         let user = await blockchain.treasury('user');
         const result = await addressSaver.sendRequestAddress(user.getSender(), toNano('0.01'), 12345n);
         expect(result.transactions).toHaveTransaction({
@@ -91,6 +106,5 @@ describe('AddressSaver', () => {
             exitCode: 3
         });
     });
-
 
 });
